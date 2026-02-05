@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,11 +23,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/user")
 public class UserController {
 
-  final private UserService userService;
+  private UserService userService;
+
+  @Autowired
+  public UserController(UserService userService) {
+    this.userService = userService;
+  }
 
   @GetMapping
   public ResponseEntity<Object> getAllUser() {
@@ -57,5 +62,4 @@ public class UserController {
     userService.deleteUser(id);
     return CustomResponse.generate(HttpStatus.OK, "Deleted user with id " + id);
   }
-
 }

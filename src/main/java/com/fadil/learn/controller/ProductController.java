@@ -1,7 +1,5 @@
 package com.fadil.learn.controller;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +19,7 @@ import com.fadil.learn.model.Product;
 import com.fadil.learn.request.CreateProductRequest;
 import com.fadil.learn.service.ProductService;
 import com.fadil.learn.util.CustomResponse;
+import com.fadil.learn.util.IdentityUtils;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +41,8 @@ public class ProductController {
 
     Sort sort = asc ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
     Pageable pageable = PageRequest.of(page, size, sort);
+
+    System.out.println(IdentityUtils.getCurrentUser().getId());
 
     Page<Product> listProduct = productService.getAllProduct(pageable);
     return CustomResponse.generate(HttpStatus.OK, "Get list product", listProduct);

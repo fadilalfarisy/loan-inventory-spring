@@ -2,6 +2,9 @@ package com.fadil.learn.service;
 
 import java.util.List;
 
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.fadil.learn.model.Department;
@@ -12,17 +15,22 @@ import com.fadil.learn.repository.UserRepository;
 import com.fadil.learn.request.CreateUserRequest;
 
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
 
-  final private UserRepository userRepository;
+  private UserRepository userRepository;
+  private EmployeeService employeeService;
+  private DepartmentService departmentService;
+  private RoleService roleService;
 
-  final private EmployeeService employeeService;
-  final private DepartmentService departmentService;
-  final private RoleService roleService;
+  public UserService(UserRepository userRepository, EmployeeService employeeService,
+      DepartmentService departmentService, RoleService roleService) {
+    this.userRepository = userRepository;
+    this.employeeService = employeeService;
+    this.departmentService = departmentService;
+    this.roleService = roleService;
+  }
 
   public List<User> getAllUser() {
     return userRepository.findAll();
@@ -80,5 +88,11 @@ public class UserService {
   public void deleteUser(Integer id) {
     getUserById(id);
     userRepository.deleteById(id);
+  }
+
+  @Override
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    return userRepository.findByUsername(username)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
   }
 }

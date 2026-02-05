@@ -2,7 +2,6 @@ package com.fadil.learn.controller;
 
 import java.util.List;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fadil.learn.api.RequestLoanApi;
@@ -23,6 +21,7 @@ import com.fadil.learn.request.ChangeStatusLoanRequest;
 import com.fadil.learn.request.CreateLoanRequest;
 import com.fadil.learn.service.RequestLoanService;
 import com.fadil.learn.util.CustomResponse;
+import com.fadil.learn.util.IdentityUtils;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +35,7 @@ public class RequestLoanController implements RequestLoanApi {
 
   @GetMapping
   public ResponseEntity<Object> getAllLoanRequest(Pageable pageable) {
+    System.out.println(IdentityUtils.getCurrentUser().getUsername());
     List<LoanHistoryDTO> listLoanHistory = requestLoanService.getAllLoanHistory(pageable);
     return CustomResponse.generate(HttpStatus.OK, "Get list loan history", listLoanHistory);
   }
@@ -49,15 +49,13 @@ public class RequestLoanController implements RequestLoanApi {
   @DeleteMapping("{id}")
   public ResponseEntity<Object> deleteLoanRequest(@PathVariable Integer id) {
     requestLoanService.deleteLoanHistory(id);
-    return CustomResponse.generate(HttpStatus.OK, "Deleted loan history with id "
-        + id);
+    return CustomResponse.generate(HttpStatus.OK, "Deleted loan history with id " + id);
   }
 
   @PostMapping
   public ResponseEntity<Object> createLoanRequest(@RequestBody CreateLoanRequest request) {
     LoanHistoryDTO newLoanHistory = requestLoanService.createLoanRequest(request);
-    return CustomResponse.generate(HttpStatus.CREATED, "Created request loan",
-        newLoanHistory);
+    return CustomResponse.generate(HttpStatus.CREATED, "Created request loan", newLoanHistory);
   }
 
   @PatchMapping("/approve/{id}")
@@ -96,28 +94,36 @@ public class RequestLoanController implements RequestLoanApi {
     return CustomResponse.generate(HttpStatus.OK, "Updated status loan request to receive with id " + id);
   }
 
-  @PostMapping("/requester/active")
-  public ResponseEntity<Object> getLoanRequestActiveByUser(@RequestBody UserDTO userDTO) {
-    List<LoanHistoryDTO> listLoanHistory = requestLoanService.getLoanRequestUserActive(userDTO.getId());
+  @GetMapping("/requester/active")
+  public ResponseEntity<Object> getLoanRequestActiveByUser() {
+    Integer userId = IdentityUtils.getCurrentUser().getId();
+
+    List<LoanHistoryDTO> listLoanHistory = requestLoanService.getLoanRequestUserActive(userId);
     return CustomResponse.generate(HttpStatus.OK, "Get list request active user",
         listLoanHistory);
   }
 
-  @PostMapping("/requester/history")
-  public ResponseEntity<Object> getLoanRequestHistoryByUser(@RequestBody UserDTO userDTO) {
-    List<LoanHistoryDTO> listLoanHistory = requestLoanService.getLoanRequestUserHistory(userDTO.getId());
+  @GetMapping("/requester/history")
+  public ResponseEntity<Object> getLoanRequestHistoryByUser() {
+    Integer userId = IdentityUtils.getCurrentUser().getId();
+
+    List<LoanHistoryDTO> listLoanHistory = requestLoanService.getLoanRequestUserHistory(userId);
     return CustomResponse.generate(HttpStatus.OK, "Get list request history user", listLoanHistory);
   }
 
-  @PostMapping("/manager/active")
-  public ResponseEntity<Object> getLoanRequestActiveByManager(@RequestBody UserDTO userDTO) {
-    List<LoanHistoryDTO> listLoanHistory = requestLoanService.getLoanRequestManagerActive(userDTO.getId());
+  @GetMapping("/manager/active")
+  public ResponseEntity<Object> getLoanRequestActiveByManager() {
+    Integer userId = IdentityUtils.getCurrentUser().getId();
+
+    List<LoanHistoryDTO> listLoanHistory = requestLoanService.getLoanRequestManagerActive(userId);
     return CustomResponse.generate(HttpStatus.OK, "Get list request active manager", listLoanHistory);
   }
 
-  @PostMapping("/manager/history")
-  public ResponseEntity<Object> getLoanRequestHistoryByManager(@RequestBody UserDTO userDTO) {
-    List<LoanHistoryDTO> listLoanHistory = requestLoanService.getLoanRequestManagerHistory(userDTO.getId());
+  @GetMapping("/manager/history")
+  public ResponseEntity<Object> getLoanRequestHistoryByManager() {
+    Integer userId = IdentityUtils.getCurrentUser().getId();
+
+    List<LoanHistoryDTO> listLoanHistory = requestLoanService.getLoanRequestManagerHistory(userId);
     return CustomResponse.generate(HttpStatus.OK, "Get loan request history",
         listLoanHistory);
   }

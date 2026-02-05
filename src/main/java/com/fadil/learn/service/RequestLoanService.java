@@ -151,11 +151,12 @@ public class RequestLoanService {
 
   public List<LoanHistoryDTO> getLoanRequestUserActive(Integer userId) {
     User user = userService.getUserById(userId);
+
     Status statusPending = statusService.getStatusPending();
     Status statusApprove = statusService.getStatusApprove();
     Status statusOnProgress = statusService.getStatusOnProgress();
 
-    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByUserActive(user, statusPending, statusApprove,
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByUserAndStatus(user, statusPending, statusApprove,
         statusOnProgress);
     return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
   }
@@ -165,7 +166,7 @@ public class RequestLoanService {
     Status statusReject = statusService.getStatusReject();
     Status statusReceive = statusService.getStatusReceive();
 
-    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByUserHistory(user, statusReject, statusReceive);
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByUserAndStatus(user, statusReject, statusReceive);
     return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
   }
 
@@ -173,7 +174,7 @@ public class RequestLoanService {
     User user = userService.getUserById(managerId);
     Status statusPending = statusService.getStatusPending();
 
-    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByManagerActive(user, statusPending);
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByManagerAndStatus(user, statusPending);
 
     return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
   }
@@ -183,7 +184,7 @@ public class RequestLoanService {
     Status statusApprove = statusService.getStatusApprove();
     Status statusReject = statusService.getStatusReject();
 
-    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByManagerHistory(user, statusApprove, statusReject);
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByManagerAndStatus(user, statusApprove, statusReject);
 
     return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
   }
