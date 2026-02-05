@@ -3,6 +3,7 @@ package com.fadil.learn.service;
 import java.sql.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.fadil.learn.model.LoanHistory;
@@ -24,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class LoanHistoryService {
+public class RequestLoanService {
 
   final private LoanHistoryRepository loanHistoryRepository;
 
@@ -32,15 +33,14 @@ public class LoanHistoryService {
   final private ProductService productService;
   final private StatusService statusService;
 
-  public List<LoanHistoryDTO> getAllLoanHistory() {
-    return loanHistoryRepository.findAll().stream().map((loanHistory) -> loanHistoryToDTO(loanHistory)).toList();
+  public List<LoanHistoryDTO> getAllLoanHistory(Pageable pageable) {
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findAll(pageable).getContent();
+
+    System.out.println(listLoanHistory);
+    return listLoanHistory.stream().map((loanHistory) -> loanHistoryToDTO(loanHistory)).toList();
   }
 
   public LoanHistory getLoanHistoryById(Integer id) {
-    // LoanHistory loanHistory = loanHistoryRepository.findById(id)
-    // .orElseThrow(() -> new EntityNotFoundException("Loan history with id " + id +
-    // " is not found"));
-    // return loanHistoryToDTO(loanHistory);
     return loanHistoryRepository.findById(id)
         .orElseThrow(() -> new EntityNotFoundException("Loan history with id " + id + " is not found"));
   }
@@ -58,10 +58,11 @@ public class LoanHistoryService {
   }
 
   @Transactional
-  public LoanHistoryDTO createLoanHistory(CreateLoanRequest loanRequest) {
+  public LoanHistoryDTO createLoanRequest(CreateLoanRequest loanRequest) {
     LoanHistory loanHistory = new LoanHistory();
 
     User requester = userService.getUserById(loanRequest.getUserId());
+
     Product product = productService.getProductById(loanRequest.getProductId());
 
     Date requestDateSql = new Date(loanRequest.getRequestDate().getTime());
@@ -76,6 +77,8 @@ public class LoanHistoryService {
     loanHistory.setStatus(statusPending);
 
     productService.setAvailabilityProductToFalse(loanRequest.getProductId());
+
+    System.out.println(loanHistory.getUser().getId().toString());
 
     loanHistoryRepository.save(loanHistory);
 
@@ -130,7 +133,7 @@ public class LoanHistoryService {
   public LoanHistoryDTO receiveProduct(Integer userId, Integer requestId) {
     LoanHistory loanHistory = getLoanHistoryById(requestId);
 
-    Status statusReceive = statusService.getStatusReceived();
+    Status statusReceive = statusService.getStatusReceive();
     User manager = userService.getUserById(userId);
 
     Date currentDate = new Date(new java.util.Date().getTime());
@@ -146,7 +149,76 @@ public class LoanHistoryService {
     return loanHistoryToDTO(loanHistory);
   }
 
-  public LoanHistoryDTO loanHistoryToDTO(LoanHistory loanHistory) {
+  public List<LoanHistoryDTO> getLoanRequestUserActive(Integer userId) {
+    User user = userService.getUserById(userId);
+    Status statusPending = statusService.getStatusPending();
+    Status statusApprove = statusService.getStatusApprove();
+    Status statusOnProgress = statusService.getStatusOnProgress();
+
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByUserActive(user, statusPending, statusApprove,
+        statusOnProgress);
+    return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
+  }
+
+  public List<LoanHistoryDTO> getLoanRequestUserHistory(Integer userId) {
+    User user = userService.getUserById(userId);
+    Status statusReject = statusService.getStatusReject();
+    Status statusReceive = statusService.getStatusReceive();
+
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByUserHistory(user, statusReject, statusReceive);
+    return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
+  }
+
+  public List<LoanHistoryDTO> getLoanRequestManagerActive(Integer managerId) {
+    User user = userService.getUserById(managerId);
+    Status statusPending = statusService.getStatusPending();
+
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByManagerActive(user, statusPending);
+
+    return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
+  }
+
+  public List<LoanHistoryDTO> getLoanRequestManagerHistory(Integer managerId) {
+    User user = userService.getUserById(managerId);
+    Status statusApprove = statusService.getStatusApprove();
+    Status statusReject = statusService.getStatusReject();
+
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByManagerHistory(user, statusApprove, statusReject);
+
+    return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
+  }
+
+  public List<LoanHistoryDTO> getLoanRequestPending() {
+    Status statusPending = statusService.getStatusPending();
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByStatus(statusPending);
+    return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
+  }
+
+  public List<LoanHistoryDTO> getLoanRequestApprove() {
+    Status statusApprove = statusService.getStatusApprove();
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByStatus(statusApprove);
+    return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
+  }
+
+  public List<LoanHistoryDTO> getLoanRequestReject() {
+    Status statusReject = statusService.getStatusReject();
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByStatus(statusReject);
+    return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
+  }
+
+  public List<LoanHistoryDTO> getLoanRequestOnProgress() {
+    Status statusOnProgress = statusService.getStatusOnProgress();
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByStatus(statusOnProgress);
+    return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
+  }
+
+  public List<LoanHistoryDTO> getLoanRequestReceive() {
+    Status statusReceive = statusService.getStatusReceive();
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByStatus(statusReceive);
+    return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
+  }
+
+  private LoanHistoryDTO loanHistoryToDTO(LoanHistory loanHistory) {
     LoanHistoryDTO loanHistoryDTO = new LoanHistoryDTO();
 
     loanHistoryDTO.setId(loanHistory.getId());
@@ -166,12 +238,6 @@ public class LoanHistoryService {
     return loanHistoryDTO;
   }
 
-  public LoanHistory loanHistoryToEntity(LoanHistoryDTO loanHistoryDTO) {
-    LoanHistory loanHistory = new LoanHistory();
-    loanHistory.setId(loanHistoryDTO.getId());
-    return loanHistory;
-  }
-
   private StatusDTO statusToDTO(Status status) {
     StatusDTO statusDTO = new StatusDTO();
     statusDTO.setId(status.getId());
@@ -186,7 +252,12 @@ public class LoanHistoryService {
   }
 
   private UserDTO userToDTO(User user) {
+    if (user == null) {
+      return null;
+    }
+
     UserDTO userDTO = new UserDTO();
+    userDTO.setId(user.getId());
     userDTO.setUsername(user.getUsername());
     userDTO.setRole(roleToDTO(user.getRole()));
     return userDTO;

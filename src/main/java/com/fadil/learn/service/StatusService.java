@@ -65,7 +65,7 @@ public class StatusService {
     return getStatusByLevel(4);
   }
 
-  public Status getStatusReceived() {
+  public Status getStatusReceive() {
     return getStatusByLevel(5);
   }
 

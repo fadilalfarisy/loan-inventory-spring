@@ -36,7 +36,7 @@ public class AuthenticationController {
   }
 
   @PostMapping("login")
-  public ResponseEntity<Object> postMethodName(@RequestBody LoginDTO request) {
+  public ResponseEntity<Object> login(@RequestBody LoginDTO request) {
     User user = authenticationService.login(request);
 
     return user != null ? CustomResponse.generate(HttpStatus.OK, "Login sucess", user)

@@ -30,14 +30,13 @@ public class DepartmentController {
   final private DepartmentService departmentService;
 
   @GetMapping
-  public ResponseEntity<Object> getMethodName() {
+  public ResponseEntity<Object> getAllDepartment() {
     List<Department> listDepartment = departmentService.getAllDepartment();
     return CustomResponse.generate(HttpStatus.OK, "Get list department", listDepartment);
-    // return ResponseEntity.status(HttpStatus.OK).body(listDepartment);
   }
 
   @GetMapping("{id}")
-  public ResponseEntity<Object> getMethodName(@PathVariable Integer id) {
+  public ResponseEntity<Object> getDepartmentById(@PathVariable Integer id) {
     Department department = departmentService.getDepartmentById(id);
     return CustomResponse.generate(HttpStatus.OK, "Get department with id " + id, department);
   }
@@ -49,7 +48,8 @@ public class DepartmentController {
   }
 
   @PutMapping("{id}")
-  public ResponseEntity<Object> putMethodName(@PathVariable Integer id, @RequestBody CreateDepartmentRequest request) {
+  public ResponseEntity<Object> updateDepartment(@PathVariable Integer id,
+      @RequestBody CreateDepartmentRequest request) {
     departmentService.updateDepartment(id, request);
     return CustomResponse.generate(HttpStatus.OK, "Updated department with id " + id);
   }
