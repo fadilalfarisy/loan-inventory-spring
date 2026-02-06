@@ -1,4 +1,4 @@
-package com.fadil.learn.controller;
+package com.fadil.learn.controller.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

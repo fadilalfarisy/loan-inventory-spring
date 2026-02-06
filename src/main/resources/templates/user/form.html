@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <form th:action="@{/user/save}" th:object="${user}" method="post">
+    <label>Id:</label>
+    <input id="id" name="id" th:field="${user.id}" />
+    <br />
+    <label>Username:</label>
+    <input id="username" name="username" th:field="${user.username}" />
+    <div>
+      <label>Employee</label>
+      <select th:field="${user.employee.id}">
+        <option th:each="employee : ${employees}" th:value="${employee.id}" th:text="${employee.fullName}"
+          th:selected="${employee.id == user.employee.id}">
+        </option>
+      </select>
+    </div>
+    <div>
+      <label>Role</label>
+      <select th:field="${user.role.id}">
+        <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"
+          th:selected="${role.id == user.role.id}">
+        </option>
+      </select>
+    </div>
+    <br />
+    <button type="submit">Save</button>
+  </form>
+  <a th:href="@{/user}">Cancel</a>
+</body>
+
+</html>

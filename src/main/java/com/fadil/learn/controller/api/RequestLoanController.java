@@ -1,4 +1,4 @@
-package com.fadil.learn.controller;
+package com.fadil.learn.controller.api;
 
 import java.util.List;
 
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fadil.learn.api.RequestLoanApi;
 import com.fadil.learn.model.dto.LoanHistoryDTO;
-import com.fadil.learn.model.dto.UserDTO;
 import com.fadil.learn.request.ChangeStatusLoanRequest;
 import com.fadil.learn.request.CreateLoanRequest;
 import com.fadil.learn.service.RequestLoanService;

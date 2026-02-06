@@ -1,4 +1,4 @@
-package com.fadil.learn.controller;
+package com.fadil.learn.controller.api;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,8 +41,6 @@ public class ProductController {
 
     Sort sort = asc ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
     Pageable pageable = PageRequest.of(page, size, sort);
-
-    System.out.println(IdentityUtils.getCurrentUser().getId());
 
     Page<Product> listProduct = productService.getAllProduct(pageable);
     return CustomResponse.generate(HttpStatus.OK, "Get list product", listProduct);

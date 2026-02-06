@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>List User</h1>
+    <form method="get" th:action="@{/user/form}">
+        <button type="submit">Create</button>
+    </form>
+
+    <table>
+        <tr>
+            <th>Id</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Department</th>
+            <th>Actions</th>
+        </tr>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.id}"></td>
+            <td th:text="${user.username}"></td>
+            <td th:text="${user.role?.name} ? ${user.role.name} : empty"></td>
+            <td>
+                <span th:if="${user.department} == null" th:text="Empty" />
+                <span th:unless="${user.department} == null" th:text="${user.department.name}" />
+            </td>
+            <td>
+                <form method="get" th:action="@{/user/form/{id} (id=${user.id})}">
+                    <button type="submit">Edit</button>
+                </form>
+                <form method="post" th:action="@{/user/delete/{id} (id=${user.id})}">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>
