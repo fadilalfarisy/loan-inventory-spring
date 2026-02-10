@@ -1,18 +1,15 @@
 package com.fadil.learn.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.fadil.learn.model.Employee;
 import com.fadil.learn.model.Role;
 import com.fadil.learn.model.User;
-import com.fadil.learn.model.dto.LoginDTO;
-import com.fadil.learn.model.dto.RegisterDTO;
+import com.fadil.learn.model.dto.request.LoginRequest;
+import com.fadil.learn.model.dto.request.RegisterRequest;
 import com.fadil.learn.repository.EmployeeRepository;
 import com.fadil.learn.repository.UserRepository;
 
@@ -23,37 +20,27 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-  private EmployeeRepository employeeRepository;
-  private UserRepository userRepository;
-  private PasswordEncoder passwordEncoder;
-  private AuthenticationManager authenticationManager;
-  private RoleService roleService;
-
-  @Autowired
-  public AuthenticationService(EmployeeRepository employeeRepository, UserRepository userRepository,
-      PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, RoleService roleService) {
-    this.roleService = roleService;
-    this.employeeRepository = employeeRepository;
-    this.userRepository = userRepository;
-    this.passwordEncoder = passwordEncoder;
-    this.authenticationManager = authenticationManager;
-  }
+  private final EmployeeRepository employeeRepository;
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final AuthenticationManager authenticationManager;
+  private final RoleService roleService;
 
   @Transactional
-  public Boolean register(RegisterDTO registerDTO) {
+  public Boolean register(RegisterRequest registerRequest) {
 
     Employee newEmployee = new Employee();
-    newEmployee.setFullName(registerDTO.getFullName());
-    newEmployee.setEmail(registerDTO.getEmail());
-    newEmployee.setPhoneNumber(registerDTO.getPhoneNumber());
+    newEmployee.setFullName(registerRequest.getFullName());
+    newEmployee.setEmail(registerRequest.getEmail());
+    newEmployee.setPhoneNumber(registerRequest.getPhoneNumber());
 
     employeeRepository.save(newEmployee);
 
-    Role role = roleService.getRoleById(registerDTO.getRoleId());
+    Role role = roleService.getRoleById(registerRequest.getRoleId());
 
     User newUser = new User();
-    newUser.setUsername(registerDTO.getUsername());
-    newUser.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
+    newUser.setUsername(registerRequest.getUsername());
+    newUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
     newUser.setEmployee(newEmployee);
     newUser.setRole(role);
 
@@ -62,11 +49,11 @@ public class AuthenticationService {
     return userRepository.findById(newUser.getId()).isPresent();
   }
 
-  public User login(LoginDTO loginDTO) {
-    User existUser = userRepository.findByUsername(loginDTO.getUsername()).orElse(null);
+  public User login(LoginRequest loginRequest) {
+    User existUser = userRepository.findByUsername(loginRequest.getUsername()).orElse(null);
 
     if (existUser != null) {
-      if (existUser.getPassword().equals(loginDTO.getPassword())) {
+      if (existUser.getPassword().equals(loginRequest.getPassword())) {
         return existUser;
       }
     }
@@ -74,13 +61,13 @@ public class AuthenticationService {
     return null;
   }
 
-  public User authenticate(LoginDTO loginDTO) {
+  public User authenticate(LoginRequest loginRequest) {
     authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
-            loginDTO.getUsername(),
-            loginDTO.getPassword()));
+            loginRequest.getUsername(),
+            loginRequest.getPassword()));
 
-    return userRepository.findByUsername(loginDTO.getUsername())
+    return userRepository.findByUsername(loginRequest.getUsername())
         .orElseThrow();
   }
 }

@@ -1,9 +1,7 @@
 package com.fadil.learn.controller.api;
 
-import org.springframework.web.bind.annotation.RestController;
-
 import com.fadil.learn.model.Role;
-import com.fadil.learn.request.CreateRoleRequest;
+import com.fadil.learn.model.dto.request.CreateRoleRequest;
 import com.fadil.learn.service.RoleService;
 import com.fadil.learn.util.CustomResponse;
 
@@ -11,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-import org.apache.catalina.connector.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -37,7 +34,7 @@ public class RoleController {
     return CustomResponse.generate(HttpStatus.OK, "Get list role", listRole);
   }
 
-  @GetMapping("{id}")
+  @GetMapping("/{id}")
   public ResponseEntity<Object> getRoleById(@PathVariable Integer id) {
     Role role = roleService.getRoleById(id);
     return CustomResponse.generate(HttpStatus.OK, "Get role with id " + id,
@@ -50,14 +47,14 @@ public class RoleController {
     return CustomResponse.generate(HttpStatus.CREATED, "Created role", newRole);
   }
 
-  @PutMapping("{id}")
+  @PutMapping("/{id}")
   public ResponseEntity<Object> updateRole(@PathVariable Integer id,
       @RequestBody CreateRoleRequest request) {
     roleService.updateRole(id, request);
     return CustomResponse.generate(HttpStatus.OK, "Updated role with id " + id);
   }
 
-  @DeleteMapping("{id}")
+  @DeleteMapping("/{id}")
   public ResponseEntity<Object> deleteRole(@PathVariable Integer id) {
     roleService.deleteRole(id);
     return CustomResponse.generate(HttpStatus.OK, "Deleted role with id " + id);

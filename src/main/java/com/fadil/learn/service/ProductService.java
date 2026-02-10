@@ -5,8 +5,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.fadil.learn.model.Product;
+import com.fadil.learn.model.dto.request.CreateProductRequest;
 import com.fadil.learn.repository.ProductRepository;
-import com.fadil.learn.request.CreateProductRequest;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -50,17 +50,13 @@ public class ProductService {
 
   public void setAvailabilityProductToTrue(Integer id) {
     Product product = getProductById(id);
-
     product.setIsAvailable(true);
-
     productRepository.save(product);
   }
 
   public void setAvailabilityProductToFalse(Integer id) {
     Product product = getProductById(id);
-
     product.setIsAvailable(false);
-
     productRepository.save(product);
   }
 

@@ -11,26 +11,20 @@ import com.fadil.learn.model.Department;
 import com.fadil.learn.model.Employee;
 import com.fadil.learn.model.Role;
 import com.fadil.learn.model.User;
+import com.fadil.learn.model.dto.request.CreateUserRequest;
 import com.fadil.learn.repository.UserRepository;
-import com.fadil.learn.request.CreateUserRequest;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
-  private UserRepository userRepository;
-  private EmployeeService employeeService;
-  private DepartmentService departmentService;
-  private RoleService roleService;
-
-  public UserService(UserRepository userRepository, EmployeeService employeeService,
-      DepartmentService departmentService, RoleService roleService) {
-    this.userRepository = userRepository;
-    this.employeeService = employeeService;
-    this.departmentService = departmentService;
-    this.roleService = roleService;
-  }
+  private final UserRepository userRepository;
+  private final EmployeeService employeeService;
+  private final DepartmentService departmentService;
+  private final RoleService roleService;
 
   public List<User> getAllUser() {
     return userRepository.findAll();

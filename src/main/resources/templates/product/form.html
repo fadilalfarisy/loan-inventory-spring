@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="../../assets/plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
+  <!-- <link href="../../static/assets/plugins/bootstrap/css/bootstrap.css" rel="stylesheet"> -->
+
+
+  <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+
+  <title>Document</title>
+</head>
+
+<body class="container">
+  <form th:action="@{/web/product/save}" th:object="${product}" method="post">
+
+    <input id="id" name="id" type="hidden" th:field="${product.id}" />
+
+    <div class="form-group row">
+      <label class="col-2 col-form-label">Name:</label>
+      <div class="col-10">
+        <input id="name" name="name" class="form-control" th:field="${product.name}" />
+      </div>
+    </div>
+    <br />
+    <label>Condition:</label>
+    <input id="condition" name="condition" th:field="${product.condition}" />
+    <br />
+    <label>Description:</label>
+    <input id="description" name="description" th:field="${product.description}" />
+    <br />
+    <label>Availability</label>
+    <select th:field="${product.isAvailable}">
+      <option th:value="false">Not Available</option>
+      <option th:value="true">Available</option>
+    </select>
+    <br />
+    <button type="submit">Save</button>
+  </form>
+  <a th:href="@{/web/product}">Cancel</a>
+</body>
+
+</html>

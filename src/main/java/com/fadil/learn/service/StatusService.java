@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.fadil.learn.model.Status;
+import com.fadil.learn.model.dto.request.CreateStatusRequest;
 import com.fadil.learn.repository.StatusRepository;
-import com.fadil.learn.request.CreateStatusRequest;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class StatusService {
 
-  final private StatusRepository statusRepository;
+  private final StatusRepository statusRepository;
 
   public List<Status> getAllStatus() {
     return statusRepository.findAll();

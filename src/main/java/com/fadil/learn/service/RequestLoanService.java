@@ -11,13 +11,13 @@ import com.fadil.learn.model.Product;
 import com.fadil.learn.model.Role;
 import com.fadil.learn.model.Status;
 import com.fadil.learn.model.User;
-import com.fadil.learn.model.dto.LoanHistoryDTO;
-import com.fadil.learn.model.dto.ProductDTO;
-import com.fadil.learn.model.dto.RoleDTO;
-import com.fadil.learn.model.dto.StatusDTO;
-import com.fadil.learn.model.dto.UserDTO;
+import com.fadil.learn.model.dto.request.CreateLoanRequest;
+import com.fadil.learn.model.dto.response.LoanHistoryResponse;
+import com.fadil.learn.model.dto.response.ProductResponse;
+import com.fadil.learn.model.dto.response.RoleResponse;
+import com.fadil.learn.model.dto.response.StatusResponse;
+import com.fadil.learn.model.dto.response.UserResponse;
 import com.fadil.learn.repository.LoanHistoryRepository;
-import com.fadil.learn.request.CreateLoanRequest;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -27,13 +27,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RequestLoanService {
 
-  final private LoanHistoryRepository loanHistoryRepository;
+  private final LoanHistoryRepository loanHistoryRepository;
 
-  final private UserService userService;
-  final private ProductService productService;
-  final private StatusService statusService;
+  private final UserService userService;
+  private final ProductService productService;
+  private final StatusService statusService;
 
-  public List<LoanHistoryDTO> getAllLoanHistory(Pageable pageable) {
+  public List<LoanHistoryResponse> getAllLoanHistory(Pageable pageable) {
     List<LoanHistory> listLoanHistory = loanHistoryRepository.findAll(pageable).getContent();
 
     System.out.println(listLoanHistory);
@@ -45,7 +45,7 @@ public class RequestLoanService {
         .orElseThrow(() -> new EntityNotFoundException("Loan history with id " + id + " is not found"));
   }
 
-  public LoanHistoryDTO getLoanHistoryDTOById(Integer id) {
+  public LoanHistoryResponse getLoanHistoryDTOById(Integer id) {
     LoanHistory loanHistory = loanHistoryRepository.findById(id)
         .orElseThrow(() -> new EntityNotFoundException("Loan history with id " + id +
             " is not found"));
@@ -58,10 +58,8 @@ public class RequestLoanService {
   }
 
   @Transactional
-  public LoanHistoryDTO createLoanRequest(CreateLoanRequest loanRequest) {
+  public LoanHistoryResponse createLoanRequest(User requester, CreateLoanRequest loanRequest) {
     LoanHistory loanHistory = new LoanHistory();
-
-    User requester = userService.getUserById(loanRequest.getUserId());
 
     Product product = productService.getProductById(loanRequest.getProductId());
 
@@ -85,11 +83,10 @@ public class RequestLoanService {
     return loanHistoryToDTO(loanHistory);
   }
 
-  public LoanHistoryDTO approveLoanRequest(Integer userId, Integer requestId) {
+  public LoanHistoryResponse approveLoanRequest(User manager, Integer requestId) {
     LoanHistory loanHistory = getLoanHistoryById(requestId);
 
     Status statusApprove = statusService.getStatusApprove();
-    User manager = userService.getUserById(userId);
 
     Date currentDate = new Date(new java.util.Date().getTime());
 
@@ -103,7 +100,7 @@ public class RequestLoanService {
   }
 
   @Transactional
-  public LoanHistoryDTO rejectLoanRequest(Integer userId, Integer requestId) {
+  public LoanHistoryResponse rejectLoanRequest(Integer requestId) {
     LoanHistory loanHistory = getLoanHistoryById(requestId);
 
     Status statusReject = statusService.getStatusReject();
@@ -117,7 +114,7 @@ public class RequestLoanService {
     return loanHistoryToDTO(loanHistory);
   }
 
-  public LoanHistoryDTO onProgressRequest(Integer userId, Integer requestId) {
+  public LoanHistoryResponse onProgressRequest(Integer requestId) {
     LoanHistory loanHistory = getLoanHistoryById(requestId);
 
     Status statusOnProgress = statusService.getStatusOnProgress();
@@ -130,16 +127,15 @@ public class RequestLoanService {
   }
 
   @Transactional
-  public LoanHistoryDTO receiveProduct(Integer userId, Integer requestId) {
+  public LoanHistoryResponse receiveProduct(User admin, Integer requestId) {
     LoanHistory loanHistory = getLoanHistoryById(requestId);
 
     Status statusReceive = statusService.getStatusReceive();
-    User manager = userService.getUserById(userId);
 
     Date currentDate = new Date(new java.util.Date().getTime());
 
     loanHistory.setStatus(statusReceive);
-    loanHistory.setReceivedBy(manager);
+    loanHistory.setReceivedBy(admin);
     loanHistory.setReceivedAt(currentDate);
 
     productService.setAvailabilityProductToTrue(loanHistory.getProduct().getId());
@@ -149,78 +145,86 @@ public class RequestLoanService {
     return loanHistoryToDTO(loanHistory);
   }
 
-  public List<LoanHistoryDTO> getLoanRequestUserActive(Integer userId) {
-    User user = userService.getUserById(userId);
-
+  public List<LoanHistoryResponse> getLoanRequestUserActive(User requester) {
     Status statusPending = statusService.getStatusPending();
     Status statusApprove = statusService.getStatusApprove();
     Status statusOnProgress = statusService.getStatusOnProgress();
 
-    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByUserAndStatus(user, statusPending, statusApprove,
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByUserAndStatus(requester, statusPending,
+        statusApprove,
         statusOnProgress);
     return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
   }
 
-  public List<LoanHistoryDTO> getLoanRequestUserHistory(Integer userId) {
-    User user = userService.getUserById(userId);
+  public List<LoanHistoryResponse> getLoanRequestUserHistory(User requester) {
     Status statusReject = statusService.getStatusReject();
     Status statusReceive = statusService.getStatusReceive();
 
-    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByUserAndStatus(user, statusReject, statusReceive);
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByUserAndStatus(requester, statusReject,
+        statusReceive);
     return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
   }
 
-  public List<LoanHistoryDTO> getLoanRequestManagerActive(Integer managerId) {
-    User user = userService.getUserById(managerId);
+  public List<LoanHistoryResponse> getLoanRequestManagerActive(User manager) {
     Status statusPending = statusService.getStatusPending();
 
-    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByManagerAndStatus(user, statusPending);
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByManagerAndStatus(manager, statusPending);
 
     return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
   }
 
-  public List<LoanHistoryDTO> getLoanRequestManagerHistory(Integer managerId) {
-    User user = userService.getUserById(managerId);
+  public List<LoanHistoryResponse> getLoanRequestManagerHistory(User manager) {
     Status statusApprove = statusService.getStatusApprove();
     Status statusReject = statusService.getStatusReject();
 
-    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByManagerAndStatus(user, statusApprove, statusReject);
+    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByManagerAndStatus(manager, statusApprove,
+        statusReject);
 
     return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
   }
 
-  public List<LoanHistoryDTO> getLoanRequestPending() {
-    Status statusPending = statusService.getStatusPending();
-    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByStatus(statusPending);
-    return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
-  }
+  // public List<LoanHistoryResponse> getLoanRequestPending() {
+  // Status statusPending = statusService.getStatusPending();
+  // List<LoanHistory> listLoanHistory =
+  // loanHistoryRepository.findByStatus(statusPending);
+  // return listLoanHistory.stream().map(loanHistory ->
+  // loanHistoryToDTO(loanHistory)).toList();
+  // }
 
-  public List<LoanHistoryDTO> getLoanRequestApprove() {
-    Status statusApprove = statusService.getStatusApprove();
-    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByStatus(statusApprove);
-    return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
-  }
+  // public List<LoanHistoryResponse> getLoanRequestApprove() {
+  // Status statusApprove = statusService.getStatusApprove();
+  // List<LoanHistory> listLoanHistory =
+  // loanHistoryRepository.findByStatus(statusApprove);
+  // return listLoanHistory.stream().map(loanHistory ->
+  // loanHistoryToDTO(loanHistory)).toList();
+  // }
 
-  public List<LoanHistoryDTO> getLoanRequestReject() {
-    Status statusReject = statusService.getStatusReject();
-    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByStatus(statusReject);
-    return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
-  }
+  // public List<LoanHistoryResponse> getLoanRequestReject() {
+  // Status statusReject = statusService.getStatusReject();
+  // List<LoanHistory> listLoanHistory =
+  // loanHistoryRepository.findByStatus(statusReject);
+  // return listLoanHistory.stream().map(loanHistory ->
+  // loanHistoryToDTO(loanHistory)).toList();
+  // }
 
-  public List<LoanHistoryDTO> getLoanRequestOnProgress() {
-    Status statusOnProgress = statusService.getStatusOnProgress();
-    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByStatus(statusOnProgress);
-    return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
-  }
+  // public List<LoanHistoryResponse> getLoanRequestOnProgress() {
+  // Status statusOnProgress = statusService.getStatusOnProgress();
+  // List<LoanHistory> listLoanHistory =
+  // loanHistoryRepository.findByStatus(statusOnProgress);
+  // return listLoanHistory.stream().map(loanHistory ->
+  // loanHistoryToDTO(loanHistory)).toList();
+  // }
 
-  public List<LoanHistoryDTO> getLoanRequestReceive() {
-    Status statusReceive = statusService.getStatusReceive();
-    List<LoanHistory> listLoanHistory = loanHistoryRepository.findByStatus(statusReceive);
-    return listLoanHistory.stream().map(loanHistory -> loanHistoryToDTO(loanHistory)).toList();
-  }
+  // public List<LoanHistoryResponse> getLoanRequestReceive() {
+  // Status statusReceive = statusService.getStatusReceive();
+  // List<LoanHistory> listLoanHistory =
+  // loanHistoryRepository.findByStatus(statusReceive);
+  // return listLoanHistory.stream().map(loanHistory ->
+  // loanHistoryToDTO(loanHistory)).toList();
+  // }
 
-  private LoanHistoryDTO loanHistoryToDTO(LoanHistory loanHistory) {
-    LoanHistoryDTO loanHistoryDTO = new LoanHistoryDTO();
+  private LoanHistoryResponse loanHistoryToDTO(LoanHistory loanHistory) {
+    LoanHistoryResponse loanHistoryDTO = new LoanHistoryResponse();
 
     loanHistoryDTO.setId(loanHistory.getId());
     loanHistoryDTO.setUser(userToDTO(loanHistory.getUser()));
@@ -239,35 +243,42 @@ public class RequestLoanService {
     return loanHistoryDTO;
   }
 
-  private StatusDTO statusToDTO(Status status) {
-    StatusDTO statusDTO = new StatusDTO();
+  private StatusResponse statusToDTO(Status status) {
+    StatusResponse statusDTO = new StatusResponse();
     statusDTO.setId(status.getId());
     statusDTO.setName(status.getName());
+    statusDTO.setLevel(status.getLevel());
     return statusDTO;
   }
 
-  private RoleDTO roleToDTO(Role role) {
-    RoleDTO roleDTO = new RoleDTO();
+  private RoleResponse roleToDTO(Role role) {
+    RoleResponse roleDTO = new RoleResponse();
+    roleDTO.setId(role.getId());
     roleDTO.setName(role.getName());
+    roleDTO.setLevel(role.getLevel());
     return roleDTO;
   }
 
-  private UserDTO userToDTO(User user) {
+  private UserResponse userToDTO(User user) {
     if (user == null) {
       return null;
     }
 
-    UserDTO userDTO = new UserDTO();
+    UserResponse userDTO = new UserResponse();
     userDTO.setId(user.getId());
     userDTO.setUsername(user.getUsername());
     userDTO.setRole(roleToDTO(user.getRole()));
     return userDTO;
   }
 
-  private ProductDTO productToDTO(Product product) {
-    ProductDTO productDTO = new ProductDTO();
+  private ProductResponse productToDTO(Product product) {
+    ProductResponse productDTO = new ProductResponse();
     productDTO.setId(product.getId());
     productDTO.setName(product.getName());
+    productDTO.setDescription(product.getDescription());
+    productDTO.setCondition(product.getCondition());
+    productDTO.setIsAvailable(product.getIsAvailable());
+
     return productDTO;
   }
 }

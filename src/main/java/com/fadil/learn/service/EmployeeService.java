@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.fadil.learn.model.Employee;
+import com.fadil.learn.model.dto.request.CreateEmployeeRequest;
 import com.fadil.learn.repository.EmployeeRepository;
-import com.fadil.learn.request.CreateEmployeeRequest;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EmployeeService {
 
-  final private EmployeeRepository employeeRepository;
+  private final EmployeeRepository employeeRepository;
 
   public List<Employee> getAllEmployee() {
     return employeeRepository.findAll();

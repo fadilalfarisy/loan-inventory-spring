@@ -8,8 +8,11 @@
 </head>
 
 <body>
+
+    <div th:replace="fragment/navbar:: navbar"> </div>
+
     <h1>List User</h1>
-    <form method="get" th:action="@{/user/form}">
+    <form method="get" th:action="@{/web/user/form}">
         <button type="submit">Create</button>
     </form>
 
@@ -19,21 +22,20 @@
             <th>Username</th>
             <th>Role</th>
             <th>Department</th>
+            <th>Employee name</th>
             <th>Actions</th>
         </tr>
         <tr th:each="user : ${users}">
             <td th:text="${user.id}"></td>
             <td th:text="${user.username}"></td>
-            <td th:text="${user.role?.name} ? ${user.role.name} : empty"></td>
+            <td th:text="${user.role.name}"></td>
+            <td th:text="${user.department?.name} ? ${user.department.name} : Empty"></td>
+            <td th:text="${user.employee.fullName}"></td>
             <td>
-                <span th:if="${user.department} == null" th:text="Empty" />
-                <span th:unless="${user.department} == null" th:text="${user.department.name}" />
-            </td>
-            <td>
-                <form method="get" th:action="@{/user/form/{id} (id=${user.id})}">
+                <form method="get" th:action="@{/web/user/form/{id} (id=${user.id})}">
                     <button type="submit">Edit</button>
                 </form>
-                <form method="post" th:action="@{/user/delete/{id} (id=${user.id})}">
+                <form method="post" th:action="@{/web/user/delete/{id} (id=${user.id})}">
                     <button type="submit">Delete</button>
                 </form>
             </td>

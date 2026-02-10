@@ -1,7 +1,6 @@
 package com.fadil.learn;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -10,31 +9,45 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.fadil.learn.model.Employee;
 import com.fadil.learn.model.User;
-import com.fadil.learn.model.dto.UserDTO;
 import com.fadil.learn.repository.EmployeeRepository;
 import com.fadil.learn.repository.UserRepository;
-import com.fadil.learn.service.AuthenticationService;
 
 @SpringBootTest
 class LearnApplicationTests {
 
-	private UserRepository userRepository;
-	private EmployeeRepository employeeRepository;
-	private AuthenticationService authenticationService;
+	private final EmployeeRepository employeeRepository;
+	private final UserRepository userRepository;
 
 	@Autowired
-	public LearnApplicationTests(
-			UserRepository userRepository,
-			EmployeeRepository employeeRepository,
-			AuthenticationService authenticationService) {
-		this.userRepository = userRepository;
+	public LearnApplicationTests(EmployeeRepository employeeRepository, UserRepository userRepository) {
 		this.employeeRepository = employeeRepository;
-		this.authenticationService = authenticationService;
-
+		this.userRepository = userRepository;
 	}
 
 	@Test
 	void contextLoads() {
+	}
+
+	@Test
+	void getEmployeeByUserIsNull() {
+		List<Employee> employees = employeeRepository.findByUserIsNull();
+
+		for (Employee employee : employees) {
+			System.out.println(employee);
+		}
+
+		Assertions.assertEquals(true, true);
+	}
+
+	@Test
+	void getManager() {
+		List<User> users = userRepository.findAllUserManager();
+
+		for (User user : users) {
+			System.out.println(user);
+		}
+
+		Assertions.assertEquals(true, true);
 	}
 
 	// @Test

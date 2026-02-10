@@ -3,7 +3,7 @@ package com.fadil.learn.controller.api;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fadil.learn.model.Status;
-import com.fadil.learn.request.CreateStatusRequest;
+import com.fadil.learn.model.dto.request.CreateStatusRequest;
 import com.fadil.learn.service.StatusService;
 import com.fadil.learn.util.CustomResponse;
 
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/api/status")
 public class StatusController {
 
-  final private StatusService statusService;
+  private final StatusService statusService;
 
   @GetMapping
   public ResponseEntity<Object> getAllStatus() {
@@ -34,7 +34,7 @@ public class StatusController {
     return CustomResponse.generate(HttpStatus.OK, "Get list status", listStatus);
   }
 
-  @GetMapping("{id}")
+  @GetMapping("/{id}")
   public ResponseEntity<Object> getStatusById(@PathVariable Integer id) {
     Status status = statusService.getStatusById(id);
     return CustomResponse.generate(HttpStatus.OK, "Get role with id " + id, status);
@@ -46,13 +46,13 @@ public class StatusController {
     return CustomResponse.generate(HttpStatus.CREATED, "Created status", newStatus);
   }
 
-  @PutMapping("{id}")
+  @PutMapping("/{id}")
   public ResponseEntity<Object> updateStatus(@PathVariable Integer id, @RequestBody CreateStatusRequest request) {
     statusService.updateStatus(id, request);
     return CustomResponse.generate(HttpStatus.OK, "Updated status with id " + id);
   }
 
-  @DeleteMapping("{id}")
+  @DeleteMapping("/{id}")
   public ResponseEntity<Object> deleteStatus(@PathVariable Integer id) {
     statusService.deleteStatus(id);
     return CustomResponse.generate(HttpStatus.OK, "Deleted role with id " + id);

@@ -8,9 +8,12 @@
 </head>
 
 <body>
+
+    <div th:replace="fragment/navbar:: navbar"> </div>
+
     <h1>List Role</h1>
     <!-- <a th:href="@{/role/form}">Create</a> -->
-    <form method="get" th:action="@{/role/form}">
+    <form method="get" th:action="@{/web/role/form}">
         <button type="submit">Create</button>
     </form>
 
@@ -26,11 +29,11 @@
             <td th:text="${role.name}"></td>
             <td th:text="${role.level}"></td>
             <td>
-                <form method="get" th:action="@{/role/form/{id} (id=${role.id})}">
+                <form method="get" th:action="@{/web/role/form/{id} (id=${role.id})}">
                     <button type="submit">Edit</button>
                 </form>
                 <!-- <a th:href="@{/role/form/{id} (id=${role.id})}">Edit</a> -->
-                <form method="post" th:action="@{/role/delete/{id} (id=${role.id})}">
+                <form method="post" th:action="@{/web/role/delete/{id} (id=${role.id})}">
                     <button type="submit">Delete</button>
                 </form>
                 <!-- <a th:href="@{/role/delete/{id} (id=${role.id})}">Delete</a> -->

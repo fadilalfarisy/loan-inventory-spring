@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <form th:action="@{/web/department/save}" th:object="${department}" method="post">
+
+    <input id="id" name="id" type="hidden" th:field="${department.id}" />
+
+    <label>Name:</label>
+    <input id="name" name="name" th:field="${department.name}" />
+    <br />
+    <button type="submit">Save</button>
+  </form>
+  <a th:href="@{/web/department}">Cancel</a>
+</body>
+
+</html>

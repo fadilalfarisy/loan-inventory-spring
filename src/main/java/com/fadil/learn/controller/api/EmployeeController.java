@@ -3,7 +3,7 @@ package com.fadil.learn.controller.api;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fadil.learn.model.Employee;
-import com.fadil.learn.request.CreateEmployeeRequest;
+import com.fadil.learn.model.dto.request.CreateEmployeeRequest;
 import com.fadil.learn.service.EmployeeService;
 import com.fadil.learn.util.CustomResponse;
 
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/api/employee")
 public class EmployeeController {
 
-  final private EmployeeService employeeService;
+  private final EmployeeService employeeService;
 
   @GetMapping
   public ResponseEntity<Object> getAllEmployee() {
@@ -34,15 +34,7 @@ public class EmployeeController {
     return CustomResponse.generate(HttpStatus.OK, "Get list employee", listEmployee);
   }
 
-  // @GetMapping
-  // public ResponseEntity<Object> getAllEmployee(@RequestParam(name = "id")
-  // Integer id) {
-  // Employee employee = employeeService.getEmployeeById(id);
-  // return CustomResponse.generate(HttpStatus.OK, "Success get employee with id "
-  // + id, employee);
-  // }
-
-  @GetMapping("{id}")
+  @GetMapping("/{id}")
   public ResponseEntity<Object> getEmployeeById(@PathVariable Integer id) {
     Employee employee = employeeService.getEmployeeById(id);
     return CustomResponse.generate(HttpStatus.OK, "Get employee with id " + id, employee);
@@ -54,7 +46,7 @@ public class EmployeeController {
     return CustomResponse.generate(HttpStatus.CREATED, "Created employee", newEmployee);
   }
 
-  @PutMapping("{id}")
+  @PutMapping("/{id}")
   public ResponseEntity<Object> updateEmployee(
       @PathVariable Integer id,
       @RequestBody CreateEmployeeRequest request) {
@@ -63,10 +55,18 @@ public class EmployeeController {
     return CustomResponse.generate(HttpStatus.OK, "Updated employee with id " + id);
   }
 
-  @DeleteMapping("{id}")
+  @DeleteMapping("/{id}")
   public ResponseEntity<Object> deleteEmployee(@PathVariable Integer id) {
     employeeService.deleteEmployee(id);
     return CustomResponse.generate(HttpStatus.OK, "Deleted employee with id " + id);
   }
+
+  // @GetMapping
+  // public ResponseEntity<Object> getAllEmployee(@RequestParam(name = "id")
+  // Integer id) {
+  // Employee employee = employeeService.getEmployeeById(id);
+  // return CustomResponse.generate(HttpStatus.OK, "Success get employee with id "
+  // + id, employee);
+  // }
 
 }

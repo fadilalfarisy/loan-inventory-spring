@@ -14,38 +14,35 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fadil.learn.api.RequestLoanApi;
-import com.fadil.learn.model.dto.LoanHistoryDTO;
-import com.fadil.learn.request.ChangeStatusLoanRequest;
-import com.fadil.learn.request.CreateLoanRequest;
+import com.fadil.learn.model.User;
+import com.fadil.learn.model.dto.request.CreateLoanRequest;
+import com.fadil.learn.model.dto.response.LoanHistoryResponse;
 import com.fadil.learn.service.RequestLoanService;
 import com.fadil.learn.util.CustomResponse;
-import com.fadil.learn.util.IdentityUtils;
+import com.fadil.learn.util.AuthContext;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/loan-history")
 @RequiredArgsConstructor
-public class RequestLoanController implements RequestLoanApi {
+@RequestMapping("/api/loan-history")
+public class RequestLoanController {
 
-  final private RequestLoanService requestLoanService;
+  private final RequestLoanService requestLoanService;
 
   @GetMapping
   public ResponseEntity<Object> getAllLoanRequest(Pageable pageable) {
-    System.out.println(IdentityUtils.getCurrentUser().getUsername());
-    List<LoanHistoryDTO> listLoanHistory = requestLoanService.getAllLoanHistory(pageable);
+    List<LoanHistoryResponse> listLoanHistory = requestLoanService.getAllLoanHistory(pageable);
     return CustomResponse.generate(HttpStatus.OK, "Get list loan history", listLoanHistory);
   }
 
-  @GetMapping("{id}")
+  @GetMapping("/{id}")
   public ResponseEntity<Object> getLoanRequestById(@PathVariable Integer id) {
-    LoanHistoryDTO loanHistory = requestLoanService.getLoanHistoryDTOById(id);
+    LoanHistoryResponse loanHistory = requestLoanService.getLoanHistoryDTOById(id);
     return CustomResponse.generate(HttpStatus.OK, "Get loan history with id " + id, loanHistory);
   }
 
-  @DeleteMapping("{id}")
+  @DeleteMapping("/{id}")
   public ResponseEntity<Object> deleteLoanRequest(@PathVariable Integer id) {
     requestLoanService.deleteLoanHistory(id);
     return CustomResponse.generate(HttpStatus.OK, "Deleted loan history with id " + id);
@@ -53,78 +50,70 @@ public class RequestLoanController implements RequestLoanApi {
 
   @PostMapping
   public ResponseEntity<Object> createLoanRequest(@RequestBody CreateLoanRequest request) {
-    LoanHistoryDTO newLoanHistory = requestLoanService.createLoanRequest(request);
+    User requester = AuthContext.getCurrentUser();
+
+    LoanHistoryResponse newLoanHistory = requestLoanService.createLoanRequest(requester, request);
     return CustomResponse.generate(HttpStatus.CREATED, "Created request loan", newLoanHistory);
   }
 
   @PatchMapping("/approve/{id}")
-  public ResponseEntity<Object> approveLoanRequest(
-      @PathVariable Integer id,
-      @Valid @RequestBody ChangeStatusLoanRequest request) {
+  public ResponseEntity<Object> approveLoanRequest(@PathVariable Integer id) {
+    User manager = AuthContext.getCurrentUser();
 
-    requestLoanService.approveLoanRequest(request.getUserId(), id);
+    requestLoanService.approveLoanRequest(manager, id);
     return CustomResponse.generate(HttpStatus.OK, "Updated status loan request to approve with id " + id);
   }
 
   @PatchMapping("/reject/{id}")
-  public ResponseEntity<Object> rejectLoanRequest(
-      @PathVariable Integer id,
-      @Valid @RequestBody ChangeStatusLoanRequest request) {
-
-    requestLoanService.rejectLoanRequest(request.getUserId(), id);
+  public ResponseEntity<Object> rejectLoanRequest(@PathVariable Integer id) {
+    requestLoanService.rejectLoanRequest(id);
     return CustomResponse.generate(HttpStatus.OK, "Updated status loan request to reject with id " + id);
   }
 
   @PatchMapping("/on-progress/{id}")
-  public ResponseEntity<Object> onProgressLoanRequest(
-      @PathVariable Integer id,
-      @Valid @RequestBody ChangeStatusLoanRequest request) {
-
-    requestLoanService.onProgressRequest(request.getUserId(), id);
+  public ResponseEntity<Object> onProgressLoanRequest(@PathVariable Integer id) {
+    requestLoanService.onProgressRequest(id);
     return CustomResponse.generate(HttpStatus.OK, "Updated status loan request to on progress with id " + id);
   }
 
   @PatchMapping("/receive/{id}")
-  public ResponseEntity<Object> receiveLoanRequest(
-      @PathVariable Integer id,
-      @Valid @RequestBody ChangeStatusLoanRequest request) {
+  public ResponseEntity<Object> receiveLoanRequest(@PathVariable Integer id) {
+    User admin = AuthContext.getCurrentUser();
 
-    requestLoanService.receiveProduct(request.getUserId(), id);
+    requestLoanService.receiveProduct(admin, id);
     return CustomResponse.generate(HttpStatus.OK, "Updated status loan request to receive with id " + id);
   }
 
   @GetMapping("/requester/active")
   public ResponseEntity<Object> getLoanRequestActiveByUser() {
-    Integer userId = IdentityUtils.getCurrentUser().getId();
+    User requester = AuthContext.getCurrentUser();
 
-    List<LoanHistoryDTO> listLoanHistory = requestLoanService.getLoanRequestUserActive(userId);
-    return CustomResponse.generate(HttpStatus.OK, "Get list request active user",
-        listLoanHistory);
+    List<LoanHistoryResponse> listLoanHistory = requestLoanService.getLoanRequestUserActive(requester);
+    return CustomResponse.generate(HttpStatus.OK, "Get list request active user", listLoanHistory);
   }
 
   @GetMapping("/requester/history")
   public ResponseEntity<Object> getLoanRequestHistoryByUser() {
-    Integer userId = IdentityUtils.getCurrentUser().getId();
+    User requester = AuthContext.getCurrentUser();
 
-    List<LoanHistoryDTO> listLoanHistory = requestLoanService.getLoanRequestUserHistory(userId);
+    List<LoanHistoryResponse> listLoanHistory = requestLoanService.getLoanRequestUserHistory(requester);
     return CustomResponse.generate(HttpStatus.OK, "Get list request history user", listLoanHistory);
   }
 
   @GetMapping("/manager/active")
   public ResponseEntity<Object> getLoanRequestActiveByManager() {
-    Integer userId = IdentityUtils.getCurrentUser().getId();
+    User manager = AuthContext.getCurrentUser();
 
-    List<LoanHistoryDTO> listLoanHistory = requestLoanService.getLoanRequestManagerActive(userId);
+    List<LoanHistoryResponse> listLoanHistory = requestLoanService.getLoanRequestManagerActive(manager);
     return CustomResponse.generate(HttpStatus.OK, "Get list request active manager", listLoanHistory);
   }
 
   @GetMapping("/manager/history")
   public ResponseEntity<Object> getLoanRequestHistoryByManager() {
-    Integer userId = IdentityUtils.getCurrentUser().getId();
+    User manager = AuthContext.getCurrentUser();
 
-    List<LoanHistoryDTO> listLoanHistory = requestLoanService.getLoanRequestManagerHistory(userId);
-    return CustomResponse.generate(HttpStatus.OK, "Get loan request history",
-        listLoanHistory);
+    List<LoanHistoryResponse> listLoanHistory = requestLoanService.getLoanRequestManagerHistory(manager);
+    return CustomResponse.generate(HttpStatus.OK, "Get loan request history", listLoanHistory);
   }
 
 }

@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.fadil.learn.model.Role;
+import com.fadil.learn.model.dto.request.CreateRoleRequest;
 import com.fadil.learn.repository.RoleRepository;
-import com.fadil.learn.request.CreateRoleRequest;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RoleService {
 
-  final private RoleRepository roleRepository;
+  private final RoleRepository roleRepository;
 
   public List<Role> getAllRole() {
     return roleRepository.findAll();

@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.fadil.learn.model.Department;
+import com.fadil.learn.model.dto.request.CreateDepartmentRequest;
 import com.fadil.learn.repository.DepartmentRepository;
-import com.fadil.learn.request.CreateDepartmentRequest;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DepartmentService {
 
-  final private DepartmentRepository departmentRepository;
+  private final DepartmentRepository departmentRepository;
 
   public List<Department> getAllDepartment() {
     return departmentRepository.findAll();

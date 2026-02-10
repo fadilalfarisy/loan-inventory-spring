@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:insert="layout/index.html :: link-head"></head>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link href="../../assets/plugins/bootstrap/css/bootstrap.css" rel="stylesheet"> -->
+    <link href="../../assets/plugins/fontawesome-free/css/all.css" rel="stylesheet">
+    <link href="../../assets/plugins/datatables/media/css/jquery.dataTables.css" rel="stylesheet">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <div th:replace="layout/index :: preloader"></div>
+    <div th:replace="layout/index :: navigation"></div>
+    <div class="page-wrapper">
+        <div class="container-fluid">
+            <div class="container">
+
+
+                <h1>List Product</h1>
+                <form method="get" th:action="@{/web/product/form}">
+                    <button type="submit" class="btn btn-success">Create</button>
+                </form>
+
+                <table id="myTable" class="table-striped">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Condition</th>
+                            <th>Availability</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- <tr th:each="product : ${products}">
+                <td th:text="${product.id}"></td>
+                <td th:text="${product.name}"></td>
+                <td th:text="${product.condition}"></td>
+                <td th:text="${product.description}"></td>
+                <td th:text="${product.isAvailable} ? 'Available' : 'Not available'"></td>
+                <td>
+                    <form method="get" th:action="@{/web/product/form/{id} (id=${product.id})}">
+                        <button type="submit">Edit</button>
+                    </form>
+                    <form method="post" th:action="@{/web/product/delete/{id} (id=${product.id})}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr> -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="layout/index :: footer"></div>
+    <div th:replace="layout/index :: script-js"></div>
+</body>
+
+<!-- <div th:replace="fragment/footer:: footer"> </div> -->
+
+<script src="../../assets/plugins/datatables/media/js/jquery.js"></script>
+<script src="../../assets/plugins/datatables/media/js/jquery.dataTables.js"></script>
+
+<script>
+    function confirmDelete() {
+
+        event.preventDefault();
+        const form = event.target.form;
+
+        console.log(form)
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+                Swal.fire({
+                    title: "Deleted!",
+                    text: "Your file has been deleted.",
+                    icon: "success"
+                });
+            }
+        });
+    }
+</script>
+
+<script>
+    $(document).ready(() => {
+        console.log("Hello World");
+        let table = $('#myTable').DataTable({
+            serverSide: true,
+            ajax: {
+                url: '/api/product',
+                type: 'GET',
+                dataSrc: 'data'
+            },
+            // // for client side rendering
+            // columnDefs: [
+            //     {
+            //         targets: [1, 2],
+            //         orderable: false,
+            //         searchable: false
+            //     }
+            // ],
+            columns: [
+                {
+                    data: 'id',
+                    name: 'id',
+                    autoWidth: true
+                },
+                {
+                    data: 'name',
+                    name: 'name',
+                    autoWidth: true
+                },
+                {
+                    data: 'description',
+                    name: 'description',
+                    autoWidth: true
+                },
+                {
+                    data: 'condition',
+                    name: 'condition',
+                    autoWidth: true
+                },
+                {
+                    data: 'isAvailable',
+                    name: 'availability',
+                    autoWidth: true,
+                    render: function (data, type, full, meta) {
+                        return full.isAvailable ? `Available` : `Unavailable`;
+                    }
+                },
+                {
+                    render: function (data, type, full, meta) {
+                        return `
+                        <a href="/web/product/form/${full.id}" class="btn btn-warning">
+                            <i class ="fa fa-pencil"></i>
+                            Edit
+                        </a>
+                        
+                        <form method="post" action="/web/product/delete/${full.id}">
+                            <button type="submit" class="btn btn-danger" onclick="confirmDelete()">
+                                <i class ="fa fa-trash"></i>
+                                Delete
+                            </button>
+                        </form>
+                        `;
+                    }
+                },
+            ]
+        });
+    })
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</html>

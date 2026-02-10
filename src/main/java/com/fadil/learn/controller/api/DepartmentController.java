@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fadil.learn.model.Department;
-import com.fadil.learn.request.CreateDepartmentRequest;
+import com.fadil.learn.model.dto.request.CreateDepartmentRequest;
 import com.fadil.learn.service.DepartmentService;
 import com.fadil.learn.util.CustomResponse;
 
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequestMapping("/api/department")
 public class DepartmentController {
 
-  final private DepartmentService departmentService;
+  private final DepartmentService departmentService;
 
   @GetMapping
   public ResponseEntity<Object> getAllDepartment() {
@@ -35,26 +35,26 @@ public class DepartmentController {
     return CustomResponse.generate(HttpStatus.OK, "Get list department", listDepartment);
   }
 
-  @GetMapping("{id}")
+  @GetMapping("/{id}")
   public ResponseEntity<Object> getDepartmentById(@PathVariable Integer id) {
     Department department = departmentService.getDepartmentById(id);
     return CustomResponse.generate(HttpStatus.OK, "Get department with id " + id, department);
   }
 
-  @PostMapping()
+  @PostMapping
   public ResponseEntity<Object> createDepartment(@Valid @RequestBody CreateDepartmentRequest request) {
     Department newDepartment = departmentService.createDepartment(request);
     return CustomResponse.generate(HttpStatus.CREATED, "Created department", newDepartment);
   }
 
-  @PutMapping("{id}")
+  @PutMapping("/{id}")
   public ResponseEntity<Object> updateDepartment(@PathVariable Integer id,
       @RequestBody CreateDepartmentRequest request) {
     departmentService.updateDepartment(id, request);
     return CustomResponse.generate(HttpStatus.OK, "Updated department with id " + id);
   }
 
-  @DeleteMapping("{id}")
+  @DeleteMapping("/{id}")
   public ResponseEntity<Object> deleteDepartment(@PathVariable Integer id) {
     departmentService.deleteDepartment(id);
     return CustomResponse.generate(HttpStatus.OK, "Deleted department with id " + id);

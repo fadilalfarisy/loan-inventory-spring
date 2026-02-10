@@ -21,7 +21,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.fadil.learn.security.JwtAuthFilter;
+import com.fadil.learn.filter.JwtAuthFilter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,71 +33,49 @@ public class SecurityConfig {
   private final JwtAuthFilter jwtAuthFilter;
   private final UserDetailsService userDetailsService;
 
-  /*
-   * Main security configuration
-   * Defines endpoint access rules and JWT filter setup
-   */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
-        // Disable CSRF (not needed for stateless JWT)
         .csrf(csrf -> csrf.disable())
-
-        // Configure endpoint authorization
         .authorizeHttpRequests(auth -> auth
-            // Public endpoints
-            .requestMatchers(HttpMethod.POST, "api/auth/register")
+            .requestMatchers(
+                "/api/auth/**",
+                "/api/product",
+                "/web/**",
+                "/assets/**")
             .permitAll()
-            .requestMatchers(HttpMethod.POST, "api/auth/login")
-            .permitAll()
-            .requestMatchers(HttpMethod.GET, "api/auth/welcome")
-            .permitAll()
-            .requestMatchers("/role/**").permitAll()
-            .requestMatchers("/status/**").permitAll()
-            .requestMatchers("/product/**").permitAll()
-            .requestMatchers("/user/**").permitAll()
 
-            // Role-based endpoints
+            .requestMatchers(HttpMethod.PATCH,
+                "/api/loan-history/approve",
+                "/api/loan-history/reject")
+            .hasAuthority("ROLE_MANAGER")
+
+            .requestMatchers(HttpMethod.PATCH,
+                "/api/loan-history/on-progress",
+                "/api/loan-history/receive")
+            .hasAuthority("ROLE_ADMIN")
+
             .requestMatchers("/api/user/**").hasAuthority("ROLE_ADMIN")
 
-            .requestMatchers(HttpMethod.PATCH, "/api/loan-history/approve").hasAuthority("ROLE_MANAGER")
-            .requestMatchers(HttpMethod.PATCH, "/api/loan-history/reject").hasAuthority("ROLE_MANAGER")
-            .requestMatchers(HttpMethod.PATCH, "/api/loan-history/on-progress").hasAuthority("ROLE_ADMIN")
-            .requestMatchers(HttpMethod.PATCH, "/api/loan-history/receive").hasAuthority("ROLE_ADMIN")
+            .requestMatchers("/api/loan-history/requester/**").hasAuthority("ROLE_STAFF")
+            .requestMatchers("/api/loan-history/manager/**").hasAuthority("ROLE_MANAGER")
 
-            .requestMatchers("/api/loan-history/requester/active").hasAuthority("ROLE_STAFF")
-            .requestMatchers("/api/loan-history/requester/history").hasAuthority("ROLE_STAFF")
-
-            .requestMatchers("/api/loan-history/manager/active").hasAuthority("ROLE_MANAGER")
-            .requestMatchers("/api/loan-history/manager/history").hasAuthority("ROLE_MANAGER")
-
-            // All other endpoints require authentication
             .anyRequest().authenticated())
 
-        // Stateless session (required for JWT)
         .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-        // Set custom authentication provider
         .authenticationProvider(authenticationProvider())
 
-        // Add JWT filter before Spring Security's default filter
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
 
-  /*
-   * Password encoder bean (uses BCrypt hashing)
-   */
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 
-  /*
-   * Authentication provider configuration
-   * Links UserDetailsService and PasswordEncoder
-   */
   @Bean
   public AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -106,10 +84,6 @@ public class SecurityConfig {
     return provider;
   }
 
-  /*
-   * Authentication manager bean
-   * Required for programmatic authentication (e.g., in /generateToken)
-   */
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
     return config.getAuthenticationManager();

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <form th:action="@{/web/employee/save}" th:object="${employee}" method="post">
+
+    <input id="id" name="id" type="hidden" th:field="${employee.id}" />
+
+    <label>Full name:</label>
+    <input id="fullname" name="fullname" th:field="${employee.fullName}" />
+    <br />
+    <label>Email:</label>
+    <input id="email" name="email" th:field="${employee.email}" />
+    <br />
+    <label>Phone number:</label>
+    <input id="phone" name="phone" th:field="${employee.phoneNumber}" />
+    <br />
+    <button type="submit">Save</button>
+  </form>
+  <a th:href="@{/web/employee}">Cancel</a>
+</body>
+
+</html>
